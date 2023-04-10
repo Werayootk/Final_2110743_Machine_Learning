@@ -3,6 +3,8 @@ import os
 import logging
 from dotenv import load_dotenv, find_dotenv
 from PIL import Image
+import cv2
+import pytesseract
 
 load_dotenv(find_dotenv())
 yolo_model = os.getenv("YOLO_MODEL", "yolov5s")
@@ -11,6 +13,9 @@ logging.info(f"YOLO model - {yolo_model}")
 
 model = torch.hub.load("ultralytics/yolov5", yolo_model, pretrained=True)
 
+# Set up Tesseract for the desired language, in this case, English
+pytesseract.pytesseract.tesseract_cmd = 'tesseract'
+tessdata_dir_config = '--tessdata-dir "/backend/tessdata/" --oem 3 --psm 6 -l tha'
 
 def yolov5(img):
     """Process a PIL image."""
@@ -32,4 +37,10 @@ def yolov5(img):
     rendered_imgs = results.render()
     converted_img = Image.fromarray(rendered_imgs[0]).convert("RGB")
 
-    return detected_classes, converted_img
+    # Run OCR on the converted image
+    ocr_text = pytesseract.image_to_string(converted_img, config=tessdata_dir_config)
+
+    # Log the recognized text
+    logging.info(f"Recognized text: {ocr_text}")
+
+    return detected_classes, converted_img, ocr_text

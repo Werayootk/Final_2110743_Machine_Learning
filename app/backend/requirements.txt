@@ -13,6 +13,8 @@ tqdm
 tensorboard
 matplotlib
 seaborn
+pytesseract
+opencv-python-headless
 
 # -- API
 fastapi
