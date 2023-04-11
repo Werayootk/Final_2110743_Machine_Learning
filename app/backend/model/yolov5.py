@@ -13,10 +13,6 @@ logging.info(f"YOLO model - {yolo_model}")
 
 model = torch.hub.load("ultralytics/yolov5", yolo_model, pretrained=True)
 
-# Set up Tesseract for the desired language, in this case, English
-pytesseract.pytesseract.tesseract_cmd = 'tesseract'
-tessdata_dir_config = '--tessdata-dir "/backend/tessdata/" --oem 3 --psm 6 -l tha'
-
 def yolov5(img):
     """Process a PIL image."""
 
@@ -36,6 +32,17 @@ def yolov5(img):
 
     rendered_imgs = results.render()
     converted_img = Image.fromarray(rendered_imgs[0]).convert("RGB")
+
+    # Set up Tesseract for the desired language, in this case
+    tessdata_dir = os.path.join(os.path.dirname(__file__), 'tessdata')
+    print("Tessdata directory:", tessdata_dir)
+
+    for filename in os.listdir(tessdata_dir):
+        print(filename)
+
+    pytesseract.pytesseract.tesseract_cmd = 'tesseract'
+    tessdata_dir_config = '--tessdata-dir "/fastapi/./model/tessdata" --oem 3 --psm 6 -l tha'
+    print(tessdata_dir_config)
 
     # Run OCR on the converted image
     ocr_text = pytesseract.image_to_string(converted_img, config=tessdata_dir_config)
